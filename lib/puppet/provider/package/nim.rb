@@ -34,12 +34,13 @@ Puppet::Type.type(:package).provide :nim, :parent => :aix, :source => :aix do
 
   def uninstall
     output = lslpp("-qLc", @resource[:name]).split(':')
-    # the 6th index in the colon-delimited output contains a " " for installp/BFF
+    # the 6th index in the colon-delimited output contains a " " or a "F" for installp/BFF
+    # See discussion with IBM in PMR 24630,211,788
     # packages, and an "R" for RPMS.  (duh.)
     pkg_type = output[6]
 
     case pkg_type
-    when " "
+    when " ", "F"
       installp "-gu", @resource[:name]
     when "R"
       rpm "-e", @resource[:name]
